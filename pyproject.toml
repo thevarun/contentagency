@@ -1,0 +1,28 @@
+[project]
+name = "contentagency"
+version = "0.1.0"
+description = "ContentAgency using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]>=0.177.0,<1.0.0"
+]
+
+[project.scripts]
+contentagency = "contentagency.main:run"
+run_crew = "contentagency.main:run"
+train = "contentagency.main:train"
+replay = "contentagency.main:replay"
+test = "contentagency.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.30.1",
+]
