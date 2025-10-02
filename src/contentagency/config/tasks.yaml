@@ -1,3 +1,80 @@
+trend_research_task:
+  description: >
+    Research current trending topics and discussions across the internet for the given user interests.
+
+    User interests: {user_interests}
+
+    For each of the user's interest areas, conduct web searches to identify:
+    1. What's currently trending or being discussed heavily in each topic area
+    2. Recent news, articles, or developments that are gaining traction
+    3. Popular discussions on social media platforms
+    4. Emerging themes or conversations in these spaces
+    5. Notable thought leaders or experts weighing in on these topics
+
+    Provide specific examples and include URLs/links to relevant resources where possible.
+    Focus on finding timely, engaging topics that would be suitable for content creation.
+  expected_output: >
+    A comprehensive trend research report organized by topic area:
+
+    **Trending Topics Research Report:**
+
+    For each user interest area, provide:
+    1. **Topic Area**: [Name]
+    2. **Current Trends**: 3-5 trending themes or discussions
+    3. **Key Resources**: URLs and brief descriptions of relevant articles/posts
+    4. **Notable Conversations**: Specific discussions or debates happening online
+    5. **Content Opportunities**: How these trends could be leveraged for content
+
+    Include actual URLs and source references for all mentioned trends and resources.
+    Format as markdown without '```'
+  agent: trend_researcher
+
+brainstorming_task:
+  description: >
+    Using the trend research data from the previous task and user information, generate compelling content ideas.
+
+    User interests: {user_interests}
+    Recent posts performance: {recent_posts}
+
+    IMPORTANT: Use the trend research results from the previous task completed by the trend researcher.
+    Analyze the trending topics research to identify the most promising content opportunities.
+
+    1. Review the user's interests and analyze recent post patterns
+    2. Carefully analyze the trend research results from the previous task
+    3. Generate 8-10 specific, actionable content ideas that:
+       - Align with user interests and successful content patterns
+       - Leverage current trends identified in the research
+       - Are suitable for different platforms (LinkedIn, Twitter, Medium)
+       - Have potential for high engagement
+       - Include relevant resource links from the trend research
+
+    For each suggested topic, provide:
+    - Topic title and brief description
+    - Platform recommendations (LinkedIn/Twitter/Medium)
+    - Why it aligns with user interests
+    - Connection to current trends with specific examples
+    - Relevant resource links (URLs) from the trend research
+    - Estimated engagement potential
+  expected_output: >
+    A structured list of 8-10 content topic suggestions with detailed rationale:
+
+    **Content Topic Suggestions:**
+
+    For each topic include:
+    1. **Topic Title**: Clear, engaging title
+    2. **Description**: 2-3 sentence explanation
+    3. **Platform Fit**: Best platforms and why
+    4. **Interest Alignment**: How it connects to user's interests
+    5. **Trend Connection**: Specific current trends it leverages
+    6. **Resource Links**: Relevant URLs from trend research (if available)
+    7. **Engagement Potential**: Expected audience response
+
+    **Trending Context Summary:**
+    Summary of key trends that influenced these suggestions with source links.
+
+    Format as markdown without '```'
+  agent: brainstorming_strategist
+
 research_task:
   description: >
     Conduct a thorough research about {topic}

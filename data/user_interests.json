@@ -1,0 +1,47 @@
+{
+  "user_id": "user_001",
+  "interests": [
+    {
+      "topic": "Artificial Intelligence",
+      "subtopics": [
+        "Large Language Models"
+      ]
+    },
+    {
+      "topic": "Technology Trends",
+      "subtopics": [
+        "Cloud Computing",
+        "Cybersecurity",
+        "DevOps",
+        "Software Engineering"
+      ]
+    },
+    {
+      "topic": "Business Strategy",
+      "subtopics": [
+        "Digital Transformation",
+        "Innovation",
+        "Leadership",
+        "Entrepreneurship"
+      ]
+    },
+    {
+      "topic": "Content Creation",
+      "subtopics": [
+        "Writing",
+        "Social Media",
+        "Content Strategy",
+        "Personal Branding"
+      ]
+    },
+    {
+      "topic": "Future of Work",
+      "subtopics": [
+        "Remote Work",
+        "Automation",
+        "Skills Development",
+        "Career Growth"
+      ]
+    }
+  ]
+}
