@@ -51,10 +51,12 @@ def brainstorm():
         crew_instance = Contentagency()
 
         # Input data for the entire crew workflow
+        current_datetime = datetime.now()
         inputs = {
             'user_interests': interests_summary,
             'recent_posts': posts_summary,
-            'current_year': str(datetime.now().year)
+            'current_year': str(current_datetime.year),
+            'current_date': current_datetime.strftime("%B %d, %Y")
         }
 
         # Create unified crew with both agents and tasks

@@ -67,12 +67,15 @@ async def update_interests(request: Request):
 @app.post("/api/update-posts")
 async def update_posts(request: Request):
     """Update recent posts."""
-    data = await request.json()
-    # Save to recent_posts.json
-    file_path = Path(__file__).parent.parent.parent.parent / "data" / "recent_posts.json"
-    with open(file_path, 'w') as f:
-        json.dump(data, f, indent=2)
-    return {"status": "success", "message": "Posts updated successfully"}
+    try:
+        data = await request.json()
+        data_service.save_recent_posts(data)
+        return {"status": "success", "message": "Posts updated successfully"}
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": str(e)}
+        )
 
 
 @app.post("/api/run-brainstorm")
@@ -91,10 +94,12 @@ async def run_brainstorm():
         crew_instance = Contentagency()
 
         # Input data for the crew
+        current_datetime = datetime.now()
         inputs = {
             'user_interests': interests_summary,
             'recent_posts': posts_summary,
-            'current_year': str(datetime.now().year)
+            'current_year': str(current_datetime.year),
+            'current_date': current_datetime.strftime("%B %d, %Y")
         }
 
         # Create unified crew

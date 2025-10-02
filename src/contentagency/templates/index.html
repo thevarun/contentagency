@@ -116,10 +116,68 @@
             border-radius: 6px;
             padding: 20px;
             margin-top: 15px;
-            white-space: pre-wrap;
             max-height: 600px;
             overflow-y: auto;
-            line-height: 1.6;
+            line-height: 1.8;
+        }
+
+        .result-content h1, .result-content h2, .result-content h3 {
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .result-content h1 {
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .result-content h2 {
+            font-size: 1.4em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .result-content h3 {
+            font-size: 1.2em;
+        }
+
+        .result-content ul, .result-content ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .result-content li {
+            margin-bottom: 8px;
+        }
+
+        .result-content strong {
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .result-content a {
+            color: #667eea;
+            text-decoration: none;
+            border-bottom: 1px dotted #667eea;
+        }
+
+        .result-content a:hover {
+            color: #764ba2;
+            border-bottom: 1px solid #764ba2;
+        }
+
+        .result-content p {
+            margin-bottom: 12px;
+        }
+
+        .result-content code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
         }
 
         .loading {
@@ -443,6 +501,38 @@
             }
         }
 
+        function parseMarkdown(text) {
+            // Simple markdown parser
+            let html = text;
+
+            // Headers
+            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+            // Bold
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Links
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+            // Line breaks - convert double newlines to paragraphs
+            const paragraphs = html.split(/\n\n+/);
+            html = paragraphs.map(p => {
+                if (p.trim().startsWith('<h') || p.trim().startsWith('<ul') || p.trim().startsWith('<ol')) {
+                    return p;
+                }
+                return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+            }).join('\n');
+
+            // Lists (simple implementation)
+            html = html.replace(/^\s*[-*]\s+(.*)$/gim, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            html = html.replace(/^\s*\d+\.\s+(.*)$/gim, '<li>$1</li>');
+
+            return html;
+        }
+
         function displayResults(session) {
             const container = document.getElementById('results-container');
             const timestamp = document.getElementById('results-timestamp');
@@ -450,7 +540,9 @@
 
             const date = new Date(session.timestamp);
             timestamp.textContent = `Generated: ${date.toLocaleString()}`;
-            content.textContent = session.suggested_topics;
+
+            // Parse markdown and set HTML
+            content.innerHTML = parseMarkdown(session.suggested_topics);
 
             container.style.display = 'block';
         }

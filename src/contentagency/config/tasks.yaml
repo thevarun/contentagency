@@ -2,16 +2,22 @@ trend_research_task:
   description: >
     Research current trending topics and discussions across the internet for the given user interests.
 
+    **IMPORTANT TIME CONSTRAINTS:**
+    Current date: {current_date}
+    Focus ONLY on articles and content published within the last 60-90 days from today's date.
+    Verify publication dates and exclude any content older than 3 months.
+    Recent and timely content is CRITICAL for trend analysis.
+
     User interests: {user_interests}
 
     For each of the user's interest areas, conduct web searches to identify:
-    1. What's currently trending or being discussed heavily in each topic area
-    2. Recent news, articles, or developments that are gaining traction
-    3. Popular discussions on social media platforms
-    4. Emerging themes or conversations in these spaces
-    5. Notable thought leaders or experts weighing in on these topics
+    1. What's currently trending or being discussed heavily in each topic area (last 60-90 days)
+    2. Recent news, articles, or developments that are gaining traction (published recently)
+    3. Popular discussions on social media platforms (current conversations)
+    4. Emerging themes or conversations in these spaces (happening now)
+    5. Notable thought leaders or experts weighing in on these topics (recent commentary)
 
-    Provide specific examples and include URLs/links to relevant resources where possible.
+    Provide specific examples and include URLs/links to relevant resources WITH PUBLICATION DATES.
     Focus on finding timely, engaging topics that would be suitable for content creation.
   expected_output: >
     A comprehensive trend research report organized by topic area:
@@ -20,11 +26,13 @@ trend_research_task:
 
     For each user interest area, provide:
     1. **Topic Area**: [Name]
-    2. **Current Trends**: 3-5 trending themes or discussions
-    3. **Key Resources**: URLs and brief descriptions of relevant articles/posts
-    4. **Notable Conversations**: Specific discussions or debates happening online
+    2. **Current Trends**: 3-5 trending themes or discussions (from last 60-90 days)
+    3. **Key Resources**: URLs with PUBLICATION DATES and brief descriptions
+       Format: [Article Title](URL) - Published: [Month Year]
+    4. **Notable Conversations**: Specific discussions or debates happening online (recent only)
     5. **Content Opportunities**: How these trends could be leveraged for content
 
+    CRITICAL: All resources must include publication dates. Only include content from the last 60-90 days.
     Include actual URLs and source references for all mentioned trends and resources.
     Format as markdown without '```'
   agent: trend_researcher

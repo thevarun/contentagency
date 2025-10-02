@@ -86,6 +86,15 @@ class FileDataService:
         except json.JSONDecodeError:
             raise ValueError("Invalid JSON format in recent posts file")
 
+    def save_recent_posts(self, data: Dict[str, Any]) -> None:
+        """Save recent posts to JSON file."""
+        try:
+            posts_file = self.data_dir / "recent_posts.json"
+            with open(posts_file, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            raise ValueError(f"Failed to save recent posts: {str(e)}")
+
     def get_brainstorm_results(self, user_id: str = "user_001") -> Dict[str, Any]:
         """Load brainstorming results from JSON file."""
         try:
