@@ -3,6 +3,9 @@ from crewai.project import CrewBase, agent, crew, task, before_kickoff, after_ki
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai_tools import SerperDevTool
 from typing import List
+from pathlib import Path
+
+from contentagency.config import settings
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
@@ -47,49 +50,63 @@ class Contentagency():
             verbose=True
         )
 
-    @agent
-    def researcher(self) -> Agent:
-        return Agent(
-            config=self.agents_config['researcher'], # type: ignore[index]
-            verbose=True
-        )
+    # Legacy agents - kept for future expansion
+    # Uncomment if needed for additional workflows
 
-    @agent
-    def reporting_analyst(self) -> Agent:
-        return Agent(
-            config=self.agents_config['reporting_analyst'], # type: ignore[index]
-            verbose=True
-        )
+    # @agent
+    # def researcher(self) -> Agent:
+    #     return Agent(
+    #         config=self.agents_config['researcher'], # type: ignore[index]
+    #         verbose=True
+    #     )
+
+    # @agent
+    # def reporting_analyst(self) -> Agent:
+    #     return Agent(
+    #         config=self.agents_config['reporting_analyst'], # type: ignore[index]
+    #         verbose=True
+    #     )
 
     # To learn more about structured task outputs,
     # task dependencies, and task callbacks, check out the documentation:
     # https://docs.crewai.com/concepts/tasks#overview-of-a-task
     @task
     def trend_research_task(self) -> Task:
+        # Ensure output directory exists
+        output_path = Path(settings.output_dir) / settings.trend_research_file
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
         return Task(
             config=self.tasks_config['trend_research_task'], # type: ignore[index]
-            output_file='trend_research.md'
+            output_file=str(output_path)
         )
 
     @task
     def brainstorming_task(self) -> Task:
+        # Ensure output directory exists
+        output_path = Path(settings.output_dir) / settings.brainstorm_file
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
         return Task(
             config=self.tasks_config['brainstorming_task'], # type: ignore[index]
-            output_file='brainstorm_suggestions.md'
+            output_file=str(output_path)
         )
 
-    @task
-    def research_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['research_task'], # type: ignore[index]
-        )
+    # Legacy tasks - kept for future expansion
+    # Uncomment if needed for additional workflows
 
-    @task
-    def reporting_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['reporting_task'], # type: ignore[index]
-            output_file='report.md'
-        )
+    # @task
+    # def research_task(self) -> Task:
+    #     return Task(
+    #         config=self.tasks_config['research_task'], # type: ignore[index]
+    #     )
+
+    # @task
+    # def reporting_task(self) -> Task:
+    #     return Task(
+    #         config=self.tasks_config['reporting_task'], # type: ignore[index]
+    #         output_file='report.md'
+    #     )
 
     @crew
     def crew(self) -> Crew:

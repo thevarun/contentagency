@@ -1,0 +1,135 @@
+{
+  "info": {
+    "name": "ContentAgency API",
+    "description": "REST API for content brainstorming and trend research",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "user_001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Update Interests",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"interests\": [\n    {\"topic\": \"Artificial Intelligence\"},\n    {\"topic\": \"Technology Trends\"},\n    {\"topic\": \"Business Strategy\"}\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/interests",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "interests"]
+        }
+      }
+    },
+    {
+      "name": "Update Posts",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"posts\": [\n    {\n      \"id\": \"post_001\",\n      \"platform\": \"linkedin\",\n      \"content\": \"Exploring the latest trends in AI and machine learning\",\n      \"title\": \"AI Trends 2025\",\n      \"topics\": [\"AI\", \"ML\"]\n    },\n    {\n      \"id\": \"post_002\",\n      \"platform\": \"twitter\",\n      \"content\": \"Quick thoughts on cloud computing innovations\",\n      \"topics\": [\"Cloud\", \"Tech\"]\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "posts"]
+        }
+      }
+    },
+    {
+      "name": "Run Brainstorm",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"{{userId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/brainstorm",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "brainstorm"]
+        }
+      }
+    },
+    {
+      "name": "Get Results",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/results?limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "results"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Brainstorm with Override",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"interests\": {\n    \"user_id\": \"{{userId}}\",\n    \"interests\": [\n      {\"topic\": \"AI Ethics\"},\n      {\"topic\": \"Sustainable Technology\"}\n    ]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/brainstorm",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "brainstorm"]
+        }
+      }
+    }
+  ]
+}

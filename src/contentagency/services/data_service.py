@@ -43,7 +43,7 @@ class FileDataService:
 
         self.data_dir.mkdir(exist_ok=True)
 
-    def get_user_interests(self, user_id: str = "user_001") -> Dict[str, Any]:
+    def get_user_interests(self, user_id: str = None) -> Dict[str, Any]:
         """Load user interests from JSON file."""
         try:
             interests_file = self.data_dir / "user_interests.json"
@@ -51,7 +51,8 @@ class FileDataService:
                 data = json.load(f)
             return data
         except FileNotFoundError:
-            return {"user_id": user_id, "interests": [], "platforms": [], "posting_frequency": {}}
+            # Return empty structure with provided or default user_id
+            return {"user_id": user_id or "default_user", "interests": []}
         except json.JSONDecodeError:
             raise ValueError("Invalid JSON format in user interests file")
 
@@ -64,16 +65,21 @@ class FileDataService:
         except Exception as e:
             raise ValueError(f"Failed to save user interests: {str(e)}")
 
-    def get_recent_posts(self, user_id: str = "user_001", limit: int = 10) -> List[Dict[str, Any]]:
+    def get_recent_posts(self, user_id: str = None, limit: int = 10) -> List[Dict[str, Any]]:
         """Load recent posts from JSON file."""
         try:
             posts_file = self.data_dir / "recent_posts.json"
             with open(posts_file, 'r') as f:
                 data = json.load(f)
 
-            # Filter by user_id and limit results
+            # Get all posts if no user_id specified or file doesn't filter by user
             posts = data.get("posts", [])
-            filtered_posts = [post for post in posts if data.get("user_id") == user_id]
+
+            # Filter by user_id only if specified and file has user_id
+            if user_id and data.get("user_id"):
+                filtered_posts = [post for post in posts if data.get("user_id") == user_id]
+            else:
+                filtered_posts = posts
 
             # Sort by published_date (most recent first) and limit
             sorted_posts = sorted(filtered_posts,
@@ -95,13 +101,21 @@ class FileDataService:
         except Exception as e:
             raise ValueError(f"Failed to save recent posts: {str(e)}")
 
-    def get_brainstorm_results(self, user_id: str = "user_001") -> Dict[str, Any]:
+    def get_brainstorm_results(self, user_id: str = None) -> Dict[str, Any]:
         """Load brainstorming results from JSON file."""
         try:
             results_file = self.data_dir / "brainstorm_results.json"
             if results_file.exists():
                 with open(results_file, 'r') as f:
-                    return json.load(f)
+                    all_results = json.load(f)
+
+                # Filter by user_id if specified
+                if user_id:
+                    sessions = all_results.get("sessions", [])
+                    filtered_sessions = [s for s in sessions if s.get("user_id") == user_id]
+                    return {"sessions": filtered_sessions}
+
+                return all_results
             return {"sessions": []}
         except json.JSONDecodeError:
             raise ValueError("Invalid JSON format in brainstorm results file")
@@ -118,11 +132,12 @@ class FileDataService:
             else:
                 all_results = {"sessions": []}
 
-            # Add new session
+            # Add new session with structured data
             session = {
                 "user_id": user_id,
                 "timestamp": results.get("timestamp"),
-                "suggested_topics": results.get("suggested_topics", "")
+                "suggestions": results.get("suggestions", []),  # List of ContentSuggestion dicts
+                "trending_context_summary": results.get("trending_context_summary", "")
             }
 
             all_results["sessions"].append(session)

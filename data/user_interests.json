@@ -1,20 +1,17 @@
 {
-  "user_id": "user_001",
+  "user_id": "test_user",
   "interests": [
     {
       "topic": "Artificial Intelligence"
     },
     {
-      "topic": "Technology Trends"
+      "topic": "Machine Learning"
     },
     {
-      "topic": "Business Strategy"
+      "topic": "Data Science"
     },
     {
-      "topic": "Content Creation"
-    },
-    {
-      "topic": "Future of Work"
+      "topic": "Virtual Reality"
     }
   ]
 }

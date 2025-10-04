@@ -9,7 +9,8 @@ from datetime import datetime
 from contentagency.services.crew_runner import (
     format_interests_for_prompt,
     format_posts_for_prompt,
-    run_brainstorm_crew
+    run_brainstorm_crew,
+    parse_brainstorm_markdown
 )
 from contentagency.exceptions import ValidationError
 
@@ -217,3 +218,133 @@ class TestRunBrainstormCrew:
         assert 'current_date' in inputs
         assert "**AI**" in inputs['user_interests']
         assert "post_001" in inputs['recent_posts']
+
+
+class TestParseBrainstormMarkdown:
+    """Test markdown parsing into structured format."""
+
+    def test_parse_single_suggestion(self):
+        """Should parse a single suggestion correctly."""
+        markdown = '''
+1. **Topic Title**: "AI in Healthcare"
+   - **Description**: This is a great topic about AI applications in healthcare.
+   - **Platform Fit**: LinkedIn, Medium - best for professional audiences
+   - **Interest Alignment**: Aligns with AI and healthcare interests
+   - **Trend Connection**: Related to recent AI healthcare advancements
+   - **Resource Links**:
+     - [AI Healthcare Study](https://example.com/study) - Published: January 2025
+   - **Engagement Potential**: High, due to timely relevance
+
+## Trending Context Summary
+Current trends show increased interest in AI healthcare applications.
+        '''
+
+        result = parse_brainstorm_markdown(markdown)
+
+        assert len(result["suggestions"]) == 1
+        suggestion = result["suggestions"][0]
+
+        assert suggestion["id"] == "suggestion_1"
+        assert suggestion["title"] == "AI in Healthcare"
+        assert "AI applications in healthcare" in suggestion["description"]
+        assert "LinkedIn" in suggestion["platform_fit"]
+        assert "Medium" in suggestion["platform_fit"]
+        assert suggestion["interest_alignment"] == "Aligns with AI and healthcare interests"
+        assert "AI healthcare advancements" in suggestion["trend_connection"]
+        assert suggestion["engagement_potential"] == "High"
+        assert "timely relevance" in suggestion["engagement_reason"]
+
+        assert len(suggestion["resource_links"]) == 1
+        assert suggestion["resource_links"][0]["title"] == "AI Healthcare Study"
+        assert suggestion["resource_links"][0]["url"] == "https://example.com/study"
+        assert suggestion["resource_links"][0]["published_date"] == "January 2025"
+
+        assert "increased interest" in result["trending_context_summary"]
+
+    def test_parse_multiple_suggestions(self):
+        """Should parse multiple suggestions correctly."""
+        markdown = '''
+1. **Topic Title**: "First Topic"
+   - **Description**: First description
+   - **Platform Fit**: LinkedIn
+   - **Interest Alignment**: First alignment
+   - **Trend Connection**: First trend
+   - **Engagement Potential**: High
+
+2. **Topic Title**: "Second Topic"
+   - **Description**: Second description
+   - **Platform Fit**: Twitter, Medium
+   - **Interest Alignment**: Second alignment
+   - **Trend Connection**: Second trend
+   - **Engagement Potential**: Moderate
+        '''
+
+        result = parse_brainstorm_markdown(markdown)
+
+        assert len(result["suggestions"]) == 2
+        assert result["suggestions"][0]["title"] == "First Topic"
+        assert result["suggestions"][1]["title"] == "Second Topic"
+        assert result["suggestions"][1]["platform_fit"] == ["Twitter", "Medium"]
+
+    def test_parse_with_curly_quotes(self):
+        """Should handle curly quotes in title."""
+        markdown = '''
+1. **Topic Title**: "AI Ethics"
+   - **Description**: About AI ethics
+   - **Platform Fit**: LinkedIn
+   - **Interest Alignment**: Ethics focus
+   - **Trend Connection**: Current debates
+   - **Engagement Potential**: Moderate
+        '''
+
+        result = parse_brainstorm_markdown(markdown)
+        assert result["suggestions"][0]["title"] == "AI Ethics"
+
+    def test_parse_without_resource_links(self):
+        """Should handle suggestions without resource links."""
+        markdown = '''
+1. **Topic Title**: "Simple Topic"
+   - **Description**: Simple description
+   - **Platform Fit**: LinkedIn
+   - **Interest Alignment**: Alignment
+   - **Trend Connection**: Trend
+   - **Engagement Potential**: Low
+        '''
+
+        result = parse_brainstorm_markdown(markdown)
+        assert result["suggestions"][0]["resource_links"] == []
+
+    def test_parse_without_trending_summary(self):
+        """Should handle missing trending context summary."""
+        markdown = '''
+1. **Topic Title**: "Topic"
+   - **Description**: Description
+   - **Platform Fit**: LinkedIn
+   - **Interest Alignment**: Alignment
+   - **Trend Connection**: Trend
+   - **Engagement Potential**: Moderate
+        '''
+
+        result = parse_brainstorm_markdown(markdown)
+        assert result["trending_context_summary"] == ""
+
+    def test_parse_empty_markdown(self):
+        """Should handle empty or invalid markdown."""
+        result = parse_brainstorm_markdown("")
+        assert result["suggestions"] == []
+        assert result["trending_context_summary"] == ""
+
+    def test_parse_platforms_with_and(self):
+        """Should parse platforms separated by 'and'."""
+        markdown = '''
+1. **Topic Title**: "Topic"
+   - **Description**: Description
+   - **Platform Fit**: LinkedIn and Twitter - great platforms
+   - **Interest Alignment**: Alignment
+   - **Trend Connection**: Trend
+   - **Engagement Potential**: High
+        '''
+
+        result = parse_brainstorm_markdown(markdown)
+        assert "LinkedIn" in result["suggestions"][0]["platform_fit"]
+        assert "Twitter" in result["suggestions"][0]["platform_fit"]

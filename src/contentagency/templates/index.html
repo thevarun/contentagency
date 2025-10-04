@@ -180,6 +180,141 @@
             font-size: 0.9em;
         }
 
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .suggestion-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .suggestion-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .suggestion-title {
+            color: #667eea;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .suggestion-description {
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #6c757d;
+            min-width: 80px;
+        }
+
+        .meta-value {
+            color: #495057;
+            flex: 1;
+        }
+
+        .platform-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .platform-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .engagement-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .engagement-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .engagement-moderate {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .engagement-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .resource-links {
+            margin-top: 12px;
+        }
+
+        .resource-link {
+            display: block;
+            color: #667eea;
+            text-decoration: none;
+            padding: 6px 0;
+            border-bottom: 1px dotted #667eea;
+            transition: color 0.2s;
+        }
+
+        .resource-link:hover {
+            color: #764ba2;
+            border-bottom-color: #764ba2;
+        }
+
+        .resource-date {
+            color: #6c757d;
+            font-size: 0.85em;
+            margin-left: 8px;
+        }
+
+        .trending-summary {
+            background: #e7f1ff;
+            border-left: 4px solid #667eea;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .trending-summary h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+        }
+
         .loading {
             display: none;
             text-align: center;
@@ -537,10 +672,87 @@
             const date = new Date(session.timestamp);
             timestamp.textContent = `Generated: ${date.toLocaleString()}`;
 
-            // Parse markdown and set HTML
-            content.innerHTML = parseMarkdown(session.suggested_topics);
+            // Check if we have structured suggestions
+            if (session.suggestions && Array.isArray(session.suggestions)) {
+                content.innerHTML = renderStructuredSuggestions(session);
+            } else if (session.suggested_topics) {
+                // Fallback for old markdown format
+                content.innerHTML = parseMarkdown(session.suggested_topics);
+            } else {
+                content.innerHTML = '<p>No results available</p>';
+            }
 
             container.style.display = 'block';
+        }
+
+        function renderStructuredSuggestions(session) {
+            let html = '<div class="suggestions-grid">';
+
+            session.suggestions.forEach(suggestion => {
+                const engagementClass = `engagement-${suggestion.engagement_potential.toLowerCase()}`;
+
+                html += `
+                    <div class="suggestion-card">
+                        <div class="suggestion-title">${suggestion.title}</div>
+                        <div class="suggestion-description">${suggestion.description}</div>
+
+                        <div class="suggestion-meta">
+                            <div class="meta-row">
+                                <span class="meta-label">Platforms:</span>
+                                <div class="platform-tags">
+                                    ${suggestion.platform_fit.map(p => `<span class="platform-tag">${p}</span>`).join('')}
+                                </div>
+                            </div>
+
+                            <div class="meta-row">
+                                <span class="meta-label">Alignment:</span>
+                                <span class="meta-value">${suggestion.interest_alignment}</span>
+                            </div>
+
+                            <div class="meta-row">
+                                <span class="meta-label">Trend:</span>
+                                <span class="meta-value">${suggestion.trend_connection}</span>
+                            </div>
+
+                            <div class="meta-row">
+                                <span class="meta-label">Engagement:</span>
+                                <span class="meta-value">
+                                    <span class="engagement-badge ${engagementClass}">${suggestion.engagement_potential}</span>
+                                    <br><small>${suggestion.engagement_reason}</small>
+                                </span>
+                            </div>
+
+                            ${suggestion.resource_links && suggestion.resource_links.length > 0 ? `
+                                <div class="meta-row">
+                                    <span class="meta-label">Resources:</span>
+                                    <div class="resource-links">
+                                        ${suggestion.resource_links.map(link => `
+                                            <a href="${link.url}" class="resource-link" target="_blank">
+                                                ${link.title}
+                                                ${link.published_date ? `<span class="resource-date">(${link.published_date})</span>` : ''}
+                                            </a>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            // Add trending context summary if available
+            if (session.trending_context_summary) {
+                html += `
+                    <div class="trending-summary">
+                        <h3>📈 Trending Context Summary</h3>
+                        <div>${session.trending_context_summary}</div>
+                    </div>
+                `;
+            }
+
+            return html;
         }
 
         // Load data on page load

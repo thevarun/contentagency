@@ -44,3 +44,13 @@ htmlcov/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Output files
+output/
+*.md
+!README.md
+!CLAUDE.md
+!API.md
+!REFACTORING.md
+!TESTING.md
+!agentic_content_agency_vision_feature_requirements.md
