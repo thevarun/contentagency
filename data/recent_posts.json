@@ -11,28 +11,18 @@
         "Business Strategy",
         "Automation"
       ],
-      "engagement": {
-        "likes": 124,
-        "comments": 18,
-        "shares": 23
-      },
       "published_date": "2024-09-15"
     },
     {
       "id": "post_002",
       "platform": "Twitter",
       "title": null,
-      "content": "Hot take: The future of software development isn't about replacing developers with AI, but augmenting their capabilities. \n\nAI coding assistants are becoming the new pair programming partner. \n\n\ud83e\uddf5 Thread on how this changes the game:",
+      "content": "Hot take: The future of software development isn't about replacing developers with AI, but augmenting their capabilities. \n\nAI coding assistants are becoming the new pair programming partner. \n\n🧵 Thread on how this changes the game:",
       "topics": [
         "Technology Trends",
         "Software Engineering",
         "Future of Work"
       ],
-      "engagement": {
-        "likes": 89,
-        "comments": 12,
-        "retweets": 34
-      },
       "published_date": "2024-09-12"
     },
     {
@@ -41,13 +31,10 @@
       "title": "Building Resilient Teams in the Age of Remote Work",
       "content": "The shift to remote work has fundamentally changed how we build and maintain team cohesion. This article explores practical strategies for creating resilient, high-performing remote teams that thrive in distributed environments.",
       "topics": [
+        "Future of Work",
+        "Leadership",
         "Remote Work"
       ],
-      "engagement": {
-        "claps": 156,
-        "responses": 8,
-        "reading_time": "7 min"
-      },
       "published_date": "2024-09-08"
     },
     {
@@ -60,28 +47,18 @@
         "Business Strategy",
         "Digital Transformation"
       ],
-      "engagement": {
-        "likes": 203,
-        "comments": 31,
-        "shares": 45
-      },
       "published_date": "2024-09-05"
     },
     {
       "id": "post_005",
       "platform": "Twitter",
       "title": null,
-      "content": "Content creators: Stop chasing algorithms. Start chasing value.\n\nThe best content doesn't game the system\u2014it serves the audience.\n\n3 principles that actually work: \ud83d\udc47",
+      "content": "Content creators: Stop chasing algorithms. Start chasing value.\n\nThe best content doesn't game the system—it serves the audience.\n\n3 principles that actually work: 👇",
       "topics": [
         "Content Creation",
         "Social Media",
         "Content Strategy"
       ],
-      "engagement": {
-        "likes": 67,
-        "comments": 8,
-        "retweets": 19
-      },
       "published_date": "2024-09-03"
     }
   ]

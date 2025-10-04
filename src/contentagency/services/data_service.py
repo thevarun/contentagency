@@ -122,9 +122,7 @@ class FileDataService:
             session = {
                 "user_id": user_id,
                 "timestamp": results.get("timestamp"),
-                "suggested_topics": results.get("suggested_topics", []),
-                "trending_context": results.get("trending_context", []),
-                "reasoning": results.get("reasoning", "")
+                "suggested_topics": results.get("suggested_topics", "")
             }
 
             all_results["sessions"].append(session)

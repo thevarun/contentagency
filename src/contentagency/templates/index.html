@@ -253,10 +253,11 @@
             margin: 5px 0;
         }
 
-        .post-engagement {
+        .post-topics {
             color: #6c757d;
             font-size: 0.85em;
             margin-top: 5px;
+            font-style: italic;
         }
 
         .btn-group {
@@ -366,7 +367,6 @@
                 html += `
                     <div class="interest-item">
                         <div class="interest-topic">${interest.topic}</div>
-                        <div class="interest-subtopics">${interest.subtopics ? interest.subtopics.join(', ') : ''}</div>
                     </div>
                 `;
             });
@@ -382,16 +382,12 @@
 
             let html = '';
             postsData.posts.slice(0, 5).forEach(post => {
-                const engagement = Object.entries(post.engagement || {})
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(', ');
-
                 html += `
                     <div class="post-item">
-                        <span class="post-platform">${post.platform}</span>
+                        <span class="post-platform">${post.platform || 'unknown'}</span>
                         ${post.title ? `<div class="post-title">${post.title}</div>` : ''}
-                        <div>${post.content.substring(0, 100)}...</div>
-                        <div class="post-engagement">${engagement}</div>
+                        <div>${(post.content || '').substring(0, 100)}...</div>
+                        <div class="post-topics">${(post.topics || []).join(', ')}</div>
                     </div>
                 `;
             });
