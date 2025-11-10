@@ -4,45 +4,73 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a ContentAgency project built with crewAI framework. The project creates multi-agent AI systems where specialized agents collaborate on research and reporting tasks. The long-term vision is to evolve this into a full agentic content agency for multi-platform publishing (see `agentic_content_agency_vision_feature_requirements.md`).
+ContentAgency is a multi-agent AI system built with crewAI framework that generates compelling content ideas by analyzing current trends and user interests. The system offers three interfaces (CLI, REST API, Web UI) and features comprehensive testing. The long-term vision is to evolve this into a full agentic content agency for multi-platform publishing (see `agentic_content_agency_vision_feature_requirements.md`).
 
 ## Common Commands
 
-### Running the Crew
+### Running the System
 ```bash
-crewai run
-```
-Executes the main crew workflow with default inputs (topic: "AI LLMs")
+# Recommended: Interactive web interface
+uv run web_ui          # Start web UI at http://127.0.0.1:8000
 
-### Project-Specific Commands (via pyproject.toml)
+# REST API with Swagger docs
+uv run api             # Start API at http://127.0.0.1:8000/docs
+
+# CLI brainstorming
+uv run brainstorm      # Run crew from command line using data/ files
+```
+
+### Legacy/Alternative Commands
 ```bash
-uv run contentagency  # Run the crew
-uv run run_crew       # Alternative run command
+uv run contentagency   # Legacy: run with default topic "AI LLMs"
+uv run run_crew        # Alternative to contentagency
 uv run train <n_iterations> <filename>  # Train the crew
 uv run replay <task_id>  # Replay specific task
-uv run test <n_iterations> <eval_llm>   # Test the crew
+uv run test <n_iterations> <eval_llm>   # Crew testing mode
+```
+
+### Testing
+```bash
+uv run pytest                          # Run all 72 tests
+uv run pytest tests/test_api.py -v     # Run API tests with verbose output
+uv run pytest tests/test_crew_runner.py -v  # Run crew runner tests
+uv run pytest --cov=contentagency --cov-report=html  # Coverage report
 ```
 
 ### Dependency Management
 ```bash
-crewai install        # Install dependencies using crewAI CLI
-uv sync               # Sync dependencies with uv
+uv sync                # Sync dependencies (primary method)
+crewai install         # Alternative: install via crewAI CLI
 ```
 
 ## Architecture
 
-### Core Structure
-- **Main Entry**: `src/contentagency/main.py` - Contains run(), train(), replay(), test() functions
-- **Crew Definition**: `src/contentagency/crew.py` - Defines the Contentagency crew class with agents and tasks
-- **Configuration**:
-  - `src/contentagency/config/agents.yaml` - Agent definitions (researcher, reporting_analyst)
-  - `src/contentagency/config/tasks.yaml` - Task definitions (research_task, reporting_task)
-- **Tools**: `src/contentagency/tools/` - Custom tool implementations for agents
+### Three-Layer Architecture
+
+**Interface Layer** (3 entry points):
+- **CLI**: `src/contentagency/main.py` - Brainstorm, train, replay, test modes
+- **REST API**: `src/contentagency/api/main.py` - 5 endpoints with OpenAPI docs
+- **Web UI**: `src/contentagency/web_ui.py` - Interactive interface with Jinja2 templates
+
+**Service Layer** (orchestration & data):
+- **Crew Runner**: `src/contentagency/services/crew_runner.py` - Core execution logic, markdown parsing, result structuring
+- **Data Service**: `src/contentagency/services/data_service.py` - Data abstraction (file-based, migration-ready for database)
+
+**Agent Layer** (crewAI):
+- **Crew Definition**: `src/contentagency/crew.py` - Agent and task wiring with decorators
+- **Configuration**: `src/contentagency/config/agents.yaml` and `tasks.yaml`
+- **Models**: `src/contentagency/api/models.py` - Pydantic request/response schemas
 
 ### Agent Flow
-1. **Researcher Agent**: Conducts thorough research on given topics
-2. **Reporting Analyst Agent**: Creates detailed reports from research findings
-3. **Process**: Sequential execution with final output to `report.md`
+1. **Trend Researcher Agent**:
+   - Uses SerperDevTool for web search
+   - Finds trending topics from last 60-90 days (recency enforced)
+   - Outputs to `output/trend_research.md`
+2. **Brainstorming Strategist Agent**:
+   - Analyzes trend research output + user interests + recent posts
+   - Generates 8-10 platform-specific content ideas
+   - Outputs to `output/brainstorm_suggestions.md`
+3. **Process**: Sequential execution → markdown parsing → structured JSON → saved to `data/brainstorm_results.json`
 
 ### Key Patterns
 - Uses crewAI decorators (@agent, @task, @crew, @before_kickoff, @after_kickoff)
@@ -51,45 +79,96 @@ uv sync               # Sync dependencies with uv
 - Built-in hooks for pre/post-processing
 - Custom tools extend `BaseTool` from crewai.tools
 
-### Configuration Variables
-The system uses template variables in YAML configs:
-- `{topic}` - Research/content topic (default: "AI LLMs")
-- `{current_year}` - Automatically populated with current year
+### Template Variables in YAML Configs
+Dynamic variables injected at runtime (see `services/crew_runner.py`):
+- `{user_interests}` - Formatted user interest areas
+- `{recent_posts}` - User's recent post performance data
+- `{current_year}` - Auto-populated current year
+- `{current_date}` - Full current date for recency validation
+
+### Data Service Abstraction (Cloud-Migration Ready)
+The `data_service.py` uses a **Protocol-based interface** with factory pattern:
+- **Current**: `FileDataService` - JSON files in `data/` directory
+- **Future**: `DatabaseDataService` - Stub for cloud database (PostgreSQL, MongoDB, etc.)
+- **Factory**: `create_data_service(service_type="file")` enables runtime switching
+
+**Data Files**:
+- `data/user_interests.json` - User interest topics
+- `data/recent_posts.json` - Past content performance
+- `data/brainstorm_results.json` - Session history with suggestions
+
+**Key Methods**:
+- `get_user_interests(user_id)` / `save_user_interests(data)`
+- `get_recent_posts(user_id, limit)` / `save_recent_posts(data)`
+- `get_brainstorm_results(user_id)` / `save_brainstorm_results(user_id, results)`
 
 ### Crew Execution Modes
-- **Sequential Process**: Default execution where tasks run one after another
-- **Hierarchical Process**: Alternative execution mode (commented in crew.py:75)
-- **Training Mode**: Iterative improvement of agent performance
+- **Brainstorm Mode**: Main workflow (trend research → content ideas)
+- **Sequential Process**: Default execution (tasks run one after another)
+- **Hierarchical Process**: Alternative mode (commented out in crew.py)
+- **Training Mode**: Iterative agent performance improvement
 - **Replay Mode**: Re-execute specific tasks by ID
 - **Test Mode**: Evaluation mode with metrics
 
 ## Environment Setup
 
-Required environment variables in `.env`:
+**Required** environment variables in `.env`:
 - `OPENAI_API_KEY` - Required for LLM functionality
 - `MODEL` - LLM model to use (default: gpt-4o)
-- `SERPER_API_KEY` - For web search capabilities
+- `SERPER_API_KEY` - Required for web search (Trend Researcher agent)
 
-Python version requirement: >=3.10, <3.14
+**Optional** configuration in `.env`:
+- `API_HOST` - Server binding (default: 0.0.0.0)
+- `API_PORT` - Server port (default: 8000)
+- `DEFAULT_USER_ID` - Default user identifier (default: user_001)
+- `CORS_ORIGINS` - Comma-separated allowed origins for CORS
+
+Python version: >=3.10, <3.14
+
+## Critical Implementation Details
+
+### Markdown Parsing & Structured Output
+The `crew_runner.py:parse_brainstorm_markdown()` function converts agent markdown output to JSON using regex patterns. When modifying task output formats in `tasks.yaml`, ensure:
+- Field names match regex patterns (e.g., "**Title:**", "**Platform Fit:**")
+- Resource links follow format: `[Title](URL) - Published: Month Year`
+- No triple backticks in markdown output (breaks parsing)
+
+### Recency Enforcement
+Trend Researcher agent has **strict 60-90 day recency requirement**:
+- Backstory emphasizes "NEVER cite articles >3 months old"
+- Task description includes current_date variable for validation
+- Publication dates required in all resource links
+
+### Multi-User Support
+All data operations support user isolation via `user_id` parameter:
+- API requests can include `user_id` (defaults to `DEFAULT_USER_ID`)
+- Data service filters by user_id when retrieving results
+- Each brainstorm session tagged with user_id + timestamp
+
+### Testing Architecture
+72 tests across 4 files using pytest + pytest-mock:
+- `test_api.py` - FastAPI endpoint testing with TestClient
+- `test_crew_runner.py` - Core logic including markdown parsing
+- `test_data_service.py` - Data layer with temporary directories
+- `test_models.py` - Pydantic validation rules
+
+Run single test: `uv run pytest tests/test_api.py::TestHealthEndpoint::test_health_endpoint -v`
 
 ## Development Notes
 
-- The project uses UV for dependency management with lockfile (`uv.lock`)
-- Main workflow outputs research reports to `report.md` in markdown format
-- Agents are configured to be verbose for debugging
-- No test framework currently implemented (empty `tests/` directory)
-- Custom tools should follow the pattern in `src/contentagency/tools/custom_tool.py`
-- Agent configurations support dynamic role assignment based on topic
-- Output files are generated in project root (e.g., `report.md`)
+- **Dependency Management**: UV with lockfile (`uv.lock`) - use `uv sync` not `pip install`
+- **Output Structure**: Agents write markdown to `output/` directory, parsed to JSON, saved to `data/`
+- **Custom Tools**: Follow pattern in `src/contentagency/tools/custom_tool.py` (extends BaseTool)
+- **Agent Verbosity**: Set to `True` for debugging crew execution
+- **Legacy Agents**: `researcher` and `reporting_analyst` preserved in YAML comments for future multi-workflow expansion
+- **Cloud Migration**: Data service abstraction allows swapping FileDataService → DatabaseDataService without changing interface layer
 
-## File Structure Patterns
+## Cloud Deployment Considerations
 
-- All source code in `src/contentagency/`
-- Configuration files in `src/contentagency/config/`
-- Custom tools in `src/contentagency/tools/`
-- Generated outputs in project root
-- Vision and requirements documented in markdown files
-
-
-## Notes
-- We are developing this locally at the moment but later we'd like to deploy it to the cloud. Make migration-friendly choices for this
+Current design supports cloud migration:
+- **Stateless API**: No in-memory session state
+- **Environment-based Config**: Uses Pydantic Settings
+- **Data Abstraction**: Protocol-based interface ready for database swap
+- **Multi-user Isolation**: User ID tracking throughout system
+- **Containerization Ready**: HTTP interfaces on configurable ports
+- **CORS Support**: Configurable allowed origins for frontend hosting
